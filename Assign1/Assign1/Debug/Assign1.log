@@ -4,10 +4,14 @@ c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\bigint
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(2254): note: 参见“sscanf”的声明
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(31): warning C4018: “>=”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(33): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(33): warning C4244: “+=”: 从“const __int64”转换到“int”，可能丢失数据
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(34): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(34): warning C4244: “+=”: 从“const __int64”转换到“int”，可能丢失数据
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(49): warning C4018: “>=”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(52): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(52): warning C4244: “+=”: 从“const __int64”转换到“int”，可能丢失数据
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(53): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(53): warning C4244: “-=”: 从“const __int64”转换到“int”，可能丢失数据
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(54): warning C4018: “<”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(69): warning C4018: “<”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(72): warning C4018: “<”: 有符号/无符号不匹配
@@ -18,6 +22,9 @@ c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\bigint
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(123): warning C4018: “<”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(128): warning C4018: “<”: 有符号/无符号不匹配
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(142): warning C4018: “<”: 有符号/无符号不匹配
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(141): warning C4477: “sprintf”: 格式字符串“%08d”需要类型“int”的参数，但可变参数 1 拥有了类型“const __int64”
+  c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(141): note: 请考虑在格式字符串中使用“%lld”
+  c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(141): note: 请考虑在格式字符串中使用“%I64d”
 c:\users\ly\desktop\stanford-cs161\programming_assignment\assign1\assign1\biginteger.cpp(141): warning C4996: 'sprintf': This function or variable may be unsafe. Consider using sprintf_s instead. To disable deprecation, use _CRT_SECURE_NO_WARNINGS. See online help for details.
   c:\program files (x86)\windows kits\10\include\10.0.10240.0\ucrt\stdio.h(1769): note: 参见“sprintf”的声明
   Assign1.cpp

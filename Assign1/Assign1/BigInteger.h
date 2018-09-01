@@ -16,7 +16,7 @@ class BigInteger
 public:
 	static const int BASE = 100000000;//BigInteger::BASE
 	static const int WIDTH = 8;//大数操作的位数
-	vector<int> s;//vector存储大整数
+	vector<long long> s;//vector存储大整数
 
 	//~BigInteger();
 	BigInteger(long long num = 0) {
