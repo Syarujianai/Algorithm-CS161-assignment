@@ -23,7 +23,7 @@ Write your numeric answer in the space provided. So e.g., if your answer is 5, j
 #include <map>
 #include <ctime>
 #include <algorithm>
-
+#include <stdexcept> //runtime error
 using namespace std;
 
 /*@syaru
@@ -49,8 +49,8 @@ public:
 	//id=0 represent None
 	size_t edge_id = 0;//edge nums now
 	size_t vertex_id = 0;//vertex nums now
-	//surrogate node for deleted end node
-	map<int, int> surrogate;
+	//mapping same edge id, used in 'mergeVertex()'
+	map<int, int> same_edge;
 
 	void add(vector<vector<int>>&);
 	size_t minCutSearch(void);
@@ -74,36 +74,26 @@ void AdjacencyList::add(vector<vector<int>> &all) {
 		//feed 'remain_vertices'
 		this->vertices_remain.push_back(line[0]);
 		this->first[this->vertex_id] = -1;
-		for (int i = 1; i != line.size(); i++) {		
-			//case1: at the first time (start node), number edge and feed 'remain_edges'
-			if (find(vertices_remain.begin(), vertices_remain.end(), line[i]) == vertices_remain.end()) {
-				//number new edge
-				this->edge_id++;
-				this->edges_remain.push_back(this->edge_id);
-				//map corresponding vertices
-				this->start[this->edge_id] = this->vertex_id;
-				this->end[this->edge_id] = line[i];
-				//map corresponding edges
-				int last_edge = this->first[vertex_id];//if i=1, last_edge=-1
-				this->first[vertex_id] = this->edge_id;
-				this->next[edge_id] = last_edge;
-			}
-			//case1 or case2?
-			else {
-				int now = this->start[line[i]];
-				while (this->end[now] != this->vertex_id) {
-					//case1
-					if (now == -1) {
-						//number new edge
-						this->edge_id++;
-						this->edges_remain.push_back(this->edge_id);
-						//map corresponding vertices
-						this->start[this->edge_id] = this->vertex_id;
-						this->end[this->edge_id] = line[i];
-						//map corresponding edges
-						int last_edge = this->first[vertex_id];//if i=1, last_edge=-1
-						this->first[vertex_id] = this->edge_id;
-						this->next[edge_id] = last_edge;
+		for (int i = 1; i != line.size(); i++) {
+			//number new edge
+			this->edge_id++;
+			this->edges_remain.push_back(this->edge_id);
+			//map corresponding vertices
+			this->start[this->edge_id] = this->vertex_id;
+			this->end[this->edge_id] = line[i];
+			//map corresponding edges
+			int last_edge = this->first[vertex_id];//if i=1, last_edge=-1
+			this->first[vertex_id] = this->edge_id;
+			this->next[edge_id] = last_edge;
+
+			//case: at the second time algorithm meet the same edge, mapping this edge_id to previous edge_id.
+			if (find(vertices_remain.begin(), vertices_remain.end(), line[i]) != vertices_remain.end()) {
+				int now = this->first[line[i]];				
+				while (now != -1) {
+					//if found, double-directedly (big_id->small_id + small_id->big_id ) mapping 2 same edges.
+					if (this->end[now] == this->vertex_id) {
+						same_edge[now] = this->edge_id;
+						same_edge[this->edge_id] = now;
 						break;
 					}
 					now = this->next[now];
@@ -114,56 +104,52 @@ void AdjacencyList::add(vector<vector<int>> &all) {
 }
 
 /*@syaru
-	delete order of self loop.
-*/
-enum Order
-{
-	STA,
-	END
-};
-
-/*@syaru
 	edg_now: previous edge of the edge you wanna DEL.
 */
-void delEdge(AdjacencyList &cp, int edg_now, Order order) {
+void delEdge(AdjacencyList &cp, int edg_now) {
 	int temp = cp.next[cp.next[edg_now]];
 	cp.next[cp.next[edg_now]] = 0;//deleted edge point to 0
 	cp.start[cp.next[edg_now]] = 0;
 	cp.end[cp.next[edg_now]] = 0;
 
-	//erase value in 'edges vector'
-	if (order == STA) {
-		auto iter = find(cp.edges_remain.begin(), cp.edges_remain.end(), cp.next[edg_now]);
-		if (iter != cp.edges_remain.end()) cp.edges_remain.erase(iter);
-	}
+	//erase value in 'edges vector'	
+	auto iter = find(cp.edges_remain.begin(), cp.edges_remain.end(), cp.next[edg_now]);
+	if (iter != cp.edges_remain.end()) cp.edges_remain.erase(iter);
 
 	cp.next[edg_now] = temp;
 }
 
-void delEdgeOfVertex(AdjacencyList &cp, int vert_sta, int vert_end, Order order) {
-	int now = cp.first[vert_sta];
-	//case1: first edge, finally 'end[now] != vert_end'
-	while (cp.surrogate[cp.end[now]] == vert_end) {//TODO: surrogate[surrogate[...]]
-		int temp = cp.next[now];
-		cp.next[now] = 0;
-		cp.start[now] = 0;
-		cp.end[now] = 0;
+void delEdgeOfVertex(AdjacencyList &cp, int vert_sta, int vert_end) {
+	try {
+		int now = cp.first[vert_sta];
+		//case1: first edge, finally 'end[now] != vert_end'
+		while (cp.end[now] == vert_end) {
+			int temp = cp.next[now];
+			cp.next[now] = 0;
+			cp.start[now] = 0;
+			cp.end[now] = 0;
 
-		//erase value in 'edges vector'
-		if (order == STA) {
+			//erase value in 'edges vector'	
 			auto iter = find(cp.edges_remain.begin(), cp.edges_remain.end(), now);
 			if (iter != cp.edges_remain.end()) cp.edges_remain.erase(iter);
+
+			now = cp.first[vert_sta] = temp;
 		}
 
-		now = cp.first[vert_sta] = temp;
-	}
-	//case2: else edges 
-	if (now != -1) { //skip when 'now == -1'
-		while (cp.next[now] != -1) {
-			if (cp.end[cp.next[now]] == vert_end)
-				delEdge(cp, now, order);
-			else now = cp.next[now];
-		}
+		//TEST: throw exception
+		if (now == 0) throw runtime_error("now must be non-zero");//throw error	
+
+		//case2: else edges 
+		if (now != -1) { //skip when 'now == -1'
+			while (cp.next[now] != -1) {
+				if (cp.end[cp.next[now]] == vert_end)
+					delEdge(cp, now);
+				else now = cp.next[now];
+			}
+		}	
+	}catch (runtime_error err) {//catch error
+		cout << err.what() << endl;
+		cout << vert_sta <<" "<< vert_end << endl;
 	}
 }
 
@@ -173,18 +159,20 @@ void delEdgeOfVertex(AdjacencyList &cp, int vert_sta, int vert_end, Order order)
 */
 void delEdgeAndSelfLoop(AdjacencyList &cp, int vert_sta, int vert_end) {
 	//traversal all edge of this start/end vertex, delete self loop
-	delEdgeOfVertex(cp, vert_sta, vert_end, STA);
-	delEdgeOfVertex(cp, vert_end, vert_sta, END);	
+	delEdgeOfVertex(cp, vert_sta, vert_end);
+	delEdgeOfVertex(cp, vert_end, vert_sta);	
 }
 
 void mergeVertex(AdjacencyList &cp, int vert_sta, int vert_end) {
 	//Note: end id > start id
 	int now = cp.first[vert_end];
 	if (now != -1) { //skip when 'now == -1'
-		cp.start[now] = vert_sta;
+		cp.start[now] = vert_sta;//edges start from deleted node change to exist node
+		cp.end[cp.same_edge[now]] = vert_sta;//edges end to deleted node
 		while (cp.next[now] != -1) {
 			//substitude end-point-edge's start node
 			cp.start[cp.next[now]] = vert_sta;
+			cp.end[cp.same_edge[cp.next[now]]] = vert_sta;
 			now = cp.next[now];	
 		}
 		cp.next[now] = cp.first[vert_sta];
@@ -214,10 +202,12 @@ size_t AdjacencyList::minCutSearch(void) {
 		//copy a graph from object every contraction
 		AdjacencyList copy = (*this);
 		//reset seed, and then rand()
-		srand((unsigned)time(NULL));
+		srand((unsigned)time(NULL));//test: as i is random seed
+		//srand(unsigned(i));
 		while (copy.vertices_remain.size() != 2){
 			//randomly sample and contract an edge
-			int edge_id = copy.edges_remain[rand() % copy.edges_remain.size()];
+			int index = rand() % copy.edges_remain.size();
+			int edge_id = copy.edges_remain[index];
 			int start = copy.start[edge_id], end = copy.end[edge_id];
 			//TODO: combine delEdgeAndSelfLoop() and mergeVertex() to run faster!
 			delEdgeAndSelfLoop(copy, start, end);
@@ -237,7 +227,7 @@ size_t AdjacencyList::minCutSearch(void) {
 				cout << "min_sta: " << min_sta << ", " << "min_edges: " << min_edgs << endl;
 			}
 			else {
-				cout << "failed! " << "min_sta: " << min_sta << ", " << "min_edges: " << min_edgs << endl;
+				cout << "failed! " << "min_sta: " << copy.start[copy.edges_remain[0]] << ", " << "min_edges: " << now_edgs << endl;
 			}
 		}				
 	}
