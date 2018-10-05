@@ -1,0 +1,5 @@
+﻿  stdafx.cpp
+  Assign4.cpp
+c:\users\ly\desktop\stanford-cs161\programming_assignment\assign4unionfind\assign4\assign4.cpp(200): warning C4244: “初始化”: 从“double”转换到“int”，可能丢失数据
+  Assign4.vcxproj -> C:\Users\LY\Desktop\Stanford-CS161\programming_assignment\Assign4UnionFind\Debug\Assign4.exe
+  Assign4.vcxproj -> C:\Users\LY\Desktop\Stanford-CS161\programming_assignment\Assign4UnionFind\Debug\Assign4.pdb (Full PDB)
