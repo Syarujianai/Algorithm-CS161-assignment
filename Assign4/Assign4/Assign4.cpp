@@ -24,6 +24,7 @@ Write your numeric answer in the space provided. So e.g., if your answer is 5, j
 #include <ctime>
 #include <algorithm>
 #include <stdexcept> //runtime error
+#include <utility>
 using namespace std;
 
 /*@syaru
@@ -53,7 +54,7 @@ public:
 	map<int, int> same_edge;
 
 	void add(vector<vector<int>>&);
-	size_t minCutSearch(void);
+	pair<int, int> minCutSearch(void);
 };
 
 AdjacencyList::AdjacencyList()
@@ -112,7 +113,7 @@ void delEdge(AdjacencyList &cp, int edg_now) {
 	cp.start[cp.next[edg_now]] = 0;
 	cp.end[cp.next[edg_now]] = 0;
 
-	//erase value in 'edges vector'	
+	//erase value in 'edges vector' - log(n)
 	auto iter = find(cp.edges_remain.begin(), cp.edges_remain.end(), cp.next[edg_now]);
 	if (iter != cp.edges_remain.end()) cp.edges_remain.erase(iter);
 
@@ -173,7 +174,7 @@ void mergeVertex(AdjacencyList &cp, int vert_sta, int vert_end) {
 			//substitude end-point-edge's start node
 			cp.start[cp.next[now]] = vert_sta;
 			cp.end[cp.same_edge[cp.next[now]]] = vert_sta;
-			now = cp.next[now];	
+			now = cp.next[now];
 		}
 		cp.next[now] = cp.first[vert_sta];
 		cp.first[vert_sta] = cp.first[vert_end];
@@ -196,8 +197,8 @@ void mergeVertex(AdjacencyList &cp, int vert_sta, int vert_end) {
 	2.naive approach (extra storage).
 */
 //TODO: Visualize graph
-size_t AdjacencyList::minCutSearch(void) {
-	int min_edgs = 0, min_sta = 0;
+pair<int,int> AdjacencyList::minCutSearch(void) {
+	int min_edgs = 0, min_sta = 0, min_end = 0;
 	for (int i = 0, count = this->vertex_id*this->vertex_id; i < count; i++) {
 		//copy a graph from object every contraction
 		AdjacencyList copy = (*this);
@@ -216,22 +217,30 @@ size_t AdjacencyList::minCutSearch(void) {
 		//remember min cut (edge nums + start node)
 		if (i == 0) {
 			min_edgs = copy.edges_remain.size();
-			min_sta = copy.start[copy.edges_remain[0]];
-			cout << "min_sta: " << min_sta << ", " << "min_edges: " << min_edgs << endl;
+			min_sta = copy.vertices_remain[0];
+			min_end = copy.vertices_remain[1];
+			cout << "min_sta: " << min_sta << ", "
+				<< "min_end: " << min_end << ","
+				<< "min_edges: " << min_edgs << endl;
 		}
 		else {
 			int now_edgs = copy.edges_remain.size();
 			if (now_edgs < min_edgs) {
 				min_edgs = copy.edges_remain.size();
-				min_sta = copy.start[copy.edges_remain[0]];
-				cout << "min_sta: " << min_sta << ", " << "min_edges: " << min_edgs << endl;
+				min_sta = copy.vertices_remain[0];
+				min_end = copy.vertices_remain[1];
+				cout << "min_sta: " << min_sta << ", "
+					<< "min_end: " << min_end << ","
+					<< "min_edges: " << min_edgs << endl;
 			}
 			else {
-				cout << "failed! " << "min_sta: " << copy.start[copy.edges_remain[0]] << ", " << "min_edges: " << now_edgs << endl;
+				cout << "failed, " << "min_sta: " << copy.vertices_remain[0] << ", "
+					<< "min_end: " << copy.vertices_remain[1] << ","
+					<< "min_edges: " << now_edgs << endl;;
 			}
 		}				
 	}
-	return min_sta;
+	return make_pair(min_sta, min_end);
 }
 
 int main()
@@ -256,8 +265,9 @@ int main()
 	//create graph and search min cut
 	AdjacencyList adj;
 	adj.add(all_data);
-	size_t min_cut_start_node = adj.minCutSearch();
-	cout << "min_cut_sta: " << min_cut_start_node << endl;
+	pair<int,int> final_supervertex = adj.minCutSearch();
+	cout << "min_cut_final: " << final_supervertex.first << ","
+		<< final_supervertex.second << endl;
 	
     return 0;
 }
