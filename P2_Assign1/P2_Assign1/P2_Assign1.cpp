@@ -25,6 +25,7 @@ only 3 SCCs whose sizes are 400, 300, and 100, then your answer should be "400,3
 #include <map>
 #include <list>
 #include <queue>
+#include <ctime>
 
 using namespace std;
 
@@ -46,10 +47,10 @@ size_t finishing_time_single_loop = 0;
 class AdjacencyList
 {
 public:
-	AdjacencyList(const vector<vector<int>> &all);
+	AdjacencyList(ifstream &f);
 	//~AdjacencyList();
 	
-	size_t num_vertices;
+	int num_vertices;
 	// vector -> two bidirectional lists, 1: "g", 2: 'grev'.
 	map<int, map<string, list<int>>> edges;
 };
@@ -60,16 +61,32 @@ public:
 */
 // Note: 1. randomize the orders of selected vertices when TESTING.
 // 2. exchange the graph and reverse graph when TESTING.
-AdjacencyList::AdjacencyList(const vector<vector<int>> &all) {
+// 3. set IDE saved stack size to 2147483648 Bytes and soultion to x64.
+// Refer: https://blog.csdn.net/u010452239/article/details/70238105.
+AdjacencyList::AdjacencyList(ifstream &f) {
+	// Read data from file stream and instantiate graph object.
 	size_t max_id = 0;
-	for (auto &line : all) {
-		if (line[0] > max_id) max_id = line[0];
-		// line[0]: tail, line[1]: head.
-		this->edges[line[0]]["g"].push_back(line[1]);
-		this->edges[line[1]]["grev"].push_back(line[0]);
+	int tail, head;
+	while (f >> tail >> head) {
+		if (tail > max_id) max_id = tail;
+		this->edges[tail]["g"].push_back(head);
+		this->edges[head]["grev"].push_back(tail);
 	}
 	this->num_vertices = max_id;
+	f.close();
 }
+
+
+//AdjacencyList::AdjacencyList(const vector<vector<int>> &all) {
+//	size_t max_id = 0;
+//	for (auto &line : all) {
+//		if (line[0] > max_id) max_id = line[0];
+//		// line[0]: tail, line[1]: head.
+//		this->edges[line[0]]["g"].push_back(line[1]);
+//		this->edges[line[1]]["grev"].push_back(line[0]);
+//	}
+//	this->num_vertices = max_id;
+//}
 
 
 /**@syaru
@@ -79,31 +96,38 @@ void DFS(AdjacencyList &g, int i, int t) {
 	is_explored[i] = true;
 	// First pass or second pass.
 	if (t == 0) {
-		// Traversal all reverse edges of vertex i.
-		list<int> &edges = g.edges[i]["grev"];
-		for (auto it = edges.begin(); it != edges.end(); it++) {
-			if (is_explored[*it] == false) {
-				DFS(g, *it, t);
-			}
+		// Attention: judge whether current vertex has incoming edges in 'g' or not.
+		if (g.edges[i].find("grev") != g.edges[i].end()) {
+			// Traversal all reverse edges of vertex i.
+			list<int> &edges = g.edges[i]["grev"];
+			for (auto it = edges.begin(); it != edges.end(); it++) {
+				if (is_explored[*it] == false) {
+					DFS(g, *it, t);
+				}
+			}		
 		}
 		// First pass or second pass.
 		finishing_time++;
 		// Trick: reversal reflect so that needn't to sort when second pass. 
 		order_topo[finishing_time] = i;
 	}else {
+		// Set leader of current SCC.
 		leader_meta[i] = vertex_start;
-		// Traversal all forward edges of vertex i.
-		list<int> &edges = g.edges[i]["g"];
-		for (auto it = edges.begin(); it != edges.end(); it++) {
-			if (is_explored[*it] == false) {
-				DFS(g, *it, t);
+		// Attention: judge whether current vertex has outgoing edges in 'g' or not.
+		if (g.edges[i].find("g") != g.edges[i].end()) {
+			// Traversal all forward edges of vertex i.
+			list<int> &edges = g.edges[i]["g"];
+			for (auto it = edges.begin(); it != edges.end(); it++) {
+				if (is_explored[*it] == false) {
+					DFS(g, *it, t);
+				}
 			}
 		}
 		finishing_time_single_loop++;
 	}
 }
 
-
+#pragma optimize( "", off )
 /**@syaru
 * Kosaraju's two pass SCC algorithm.
 */
@@ -112,8 +136,11 @@ void DFSLoop(AdjacencyList &g) {
 	// Mark all vertices unexplored.
 	is_explored.assign(g.num_vertices + 1, false);
 	order_topo.assign(g.num_vertices + 1, NULL);
-	for (int i = g.num_vertices; i > 0; i--) {		
-		DFS(g, i, 0);
+	for (int i = g.num_vertices; i > 0; i--) {
+		// Attention: judge whether current vertex is explored or not before DFS.
+		if (is_explored[i] == false) {
+			DFS(g, i, 0);
+		}
 	}
 
 	// Second pass: descending order of topological order.
@@ -135,25 +162,21 @@ void DFSLoop(AdjacencyList &g) {
 
 int main()
 {	
+	// TSETING run time of code.
+	// Refer: https://blog.csdn.net/ijn842/article/details/80703277.
+	time_t begin, end;
 	// Read data from text file.
 	ifstream fin("SCC.txt");
-	vector<vector<int>> all_data;
-	string line;
-	while (getline(fin, line)) {
-		vector<int> line_data;
-		stringstream ss(line); int temp;
-		while (ss >> temp)
-		{
-			line_data.push_back(temp);
-		}
-		all_data.push_back(line_data);
-	}
-	fin.close();
-
 	// Create graph.
-	AdjacencyList g(all_data);
+	begin = clock();
+	AdjacencyList g(fin);
+	end = clock();
+	cout << "runtime: " << double(end - begin) / CLOCKS_PER_SEC << endl;
 	// Find and compute the sizes of top-5 largest SCCs.
+	begin = clock();
 	DFSLoop(g);
+	end = clock();
+	cout << "runtime: " << double(end - begin) / CLOCKS_PER_SEC << endl;
 	// Output the sizes of top-5 largest SCCs.
 	for (int i = 0; (!SCC_size.empty()) && (i < 5); i++) {
 		cout << SCC_size.top() << endl;

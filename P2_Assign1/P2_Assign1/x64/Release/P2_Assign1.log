@@ -1,0 +1,9 @@
+﻿  stdafx.cpp
+  P2_Assign1.cpp
+P2_Assign1.cpp(75): warning C4267: “=”: 从“size_t”转换到“int”，可能丢失数据
+P2_Assign1.cpp(158): warning C4267: “参数”: 从“size_t”转换到“const int”，可能丢失数据
+  正在生成代码
+  All 797 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  已完成代码的生成
+  P2_Assign1.vcxproj -> C:\Users\LY\Desktop\Stanford-CS161\assignment\P2_Assign1\x64\Release\P2_Assign1.exe
+  P2_Assign1.vcxproj -> C:\Users\LY\Desktop\Stanford-CS161\assignment\P2_Assign1\x64\Release\P2_Assign1.pdb (Full PDB)
