@@ -36,7 +36,6 @@ int main()
 	// insert all numbers into hashmap
 	int num;
 	string str;
-	
 	while (getline(fin, str)) {
 		stringstream ss;
 		ss.str(str);
@@ -44,19 +43,20 @@ int main()
 		num_dict[num] = 1;
 	}
 	
-	// search 2-sum t between [-10000,10000]
-	for (int t = - 10000; t <= 10000; t++) {
+	// count 2-sum t between [-10000,10000]
+	int count_2sum = 0;
+	for (int t = -10000; t <= 10000; t++) {
 		bool trial = false;
 		for (auto iter = num_dict.begin(); iter != num_dict.end(); iter++) {
 			int key = iter->first;
 			if (num_dict.find(t - key) != num_dict.end()) {
-				trial = true; break;
+				trial = true;
+				count_2sum++;
+				break;
 			}
 		}
-		if (trial == true) {
-			cout << "2-sum: " << t << endl; break;
-		}
 	}
+	cout << "number of 2-sum t: " << count_2sum << endl;
 	fin.close();
-    
+
 }
