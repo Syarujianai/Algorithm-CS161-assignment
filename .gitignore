@@ -1,5 +1,7 @@
 *.ipch
 *.db
 *.opendb
+*./.vs/
+*./Debug/
 P2_Assign1/Debug
 P2_Assign1/P2_Assign1/Debug
